@@ -137,15 +137,18 @@ exports.updateTaskHandler = async(event) =>{
         return makeResponse(500,"An Error Occured During the Operation.");
     }
 };
-// exports.deleteTaskHandler = async(event) =>{
-//     var params = {
-//         TableName : tableName
-//     };
-//     const data = await docClient.scan(params).promise();
-//     const items = data.Items;
-
-//     const response = {
-//         statusCode: 200,
-//         body: JSON.stringify(items)
-//     };
-// };
+exports.deleteTaskHandler = async (event) =>{
+    const { pathParameters : {id} } =event;
+    var deleteParams = {
+        TableName : tableName,
+        Key: { id },
+    };
+    try{
+        const data = await docClient.delete(deleteParams).promise();
+        return makeResponse(200,"Task Deleted.");
+    }
+    catch(err){
+        console.log(err);
+        return makeResponse(500,"An Error Occured During the Operation.");
+    }
+};

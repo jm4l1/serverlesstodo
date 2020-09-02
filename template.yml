@@ -90,26 +90,26 @@ Resources:
             Path: /{id}
             Method: PUT
 
-  # deleteTaskLambdaFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: src/handlers/index/deleteTaskHandler
-  #     Runtime: nodejs12.x
-  #     MemorySize: 128
-  #     Timeout: 100
-  #     Description: Lambda function to delete a single Todo task.
-  #     Policies:
-  #       -  DynamoDBReadPolicy:
-  #           TableName : !Ref TodosTable
-  #     Environment:
-  #       Variables:
-  #         TODOS_TABLE: !Ref TodosTable
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /{id}
-  #           Method: DELETE
+  deleteTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.deleteTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Lambda function to delete a single Todo task.
+      Policies:
+        -  DynamoDBCrudPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: DELETE
 
   TodosTable:
     Type: AWS::Serverless::SimpleTable
