@@ -15,7 +15,7 @@ Resources:
       Timeout: 100
       Description: A Lambda function to create a single Todo task.
       Policies:
-        -  DynamoDBReadPolicy:
+        -  DynamoDBWritePolicy:
             TableName : !Ref TodosTable
       Environment:
         Variables:
@@ -48,6 +48,68 @@ Resources:
             Path: /{id}
             Method: GET
 
+  readTasksLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.readTasksHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function to retreive a list of Todo tasks.
+      Policies:
+        -  DynamoDBReadPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+
+  # updateTaskLambdaFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     Handler: src/handlers/index/updateTasksHandler
+  #     Runtime: nodejs12.x
+  #     MemorySize: 128
+  #     Timeout: 100
+  #     Description: A Lambda function to update a single Todo task.
+  #     Policies:
+  #       -  DynamoDBReadPolicy:
+  #           TableName : !Ref TodosTable
+  #     Environment:
+  #       Variables:
+  #         TODOS_TABLE: !Ref TodosTable
+  #     Events:
+  #       Api:
+  #         Type: Api
+  #         Properties:
+  #           Path: /{id}
+  #           Method: PUT
+
+  # deleteTaskLambdaFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     Handler: src/handlers/index/deleteTaskHandler
+  #     Runtime: nodejs12.x
+  #     MemorySize: 128
+  #     Timeout: 100
+  #     Description: A Lambda function to delete a single Todo task.
+  #     Policies:
+  #       -  DynamoDBReadPolicy:
+  #           TableName : !Ref TodosTable
+  #     Environment:
+  #       Variables:
+  #         TODOS_TABLE: !Ref TodosTable
+  #     Events:
+  #       Api:
+  #         Type: Api
+  #         Properties:
+  #           Path: /{id}
+  #           Method: DELETE
 
   TodosTable:
     Type: AWS::Serverless::SimpleTable

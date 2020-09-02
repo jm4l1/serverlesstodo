@@ -4,89 +4,100 @@ const  uuid = require('uuid');
 const dynamodb = require('aws-sdk/clients/dynamodb');
 const docClient = new dynamodb.DocumentClient();
 
+const makeResponse = (statusCode, message, data =[] ) =>{
+    return({
+        statusCode,
+        body :JSON.stringify({
+            message,
+            data
+        })
+    });
+};
 exports.createTaskHandler = async(event) =>{
     const { body } = event;
     const { name } = JSON.parse(body);
-    let response = {};
     if(!name){
-        response.statusCode = 400;
-        response.body = JSON.stringify({
-            message : "name parameter is required to create task",
-            data : []
-        });
-        return response;
+        return makeResponse(400,"name parameter is required to create task");
     }
+    const date = new Date().toLocaleDateString();
     const params = {
         TableName : tableName,
         Item: { 
                 id : uuid.v4(), 
-                name: name 
+                name: name,
+                createdAt : date,
+                updatedAt : date
             }
     };
     try{
-        const data = await docClient.scan(params).promise();
-        const items = data.Items;
-        const body = {
-            message : "Task created",
-            data : items
-        };
-        response.statusCode = 200;
-        response.body = JSON.stringify(body);
+        await docClient.put(params).promise();
+        return makeResponse(200,"Task created");
     }
     catch(err){
-        console.log(err)
-        const body = {
-            message : "An Error Occured During the Operation.",
-            data : []
-        };
-        response.statusCode = 500;
-        response.body = JSON.stringify(body);
-    }
-    finally{
-        return response;
+        console.log(err);
+        return makeResponse(500,"An Error Occured During the Operation.");
     }
 };
 exports.readTaskHandler = async(event) =>{
     const { pathParameters : {id} } =event;
     var params = {
         TableName : tableName,
-        Key: { id: id },
+        Key: { 
+            id: id 
+        },
     };
-    let response = {};
     try{
         const data = await docClient.get(params).promise();
-        const items = data.Items;
-        if(items.length == 0){
+        const {Item} = data;
+        if(!Item){
             const body = {
                 message : "Task Not Found.",
                 data : []
             };
-            response.statusCode = 404;
-            response.body = JSON.stringify(body);
-            return response;
+            return makeResponse(400,"Task Not Found.");
         }
-    
-        const body = {
-            message : "Task created",
-            data : [{...items}]
-        };
-        response.statusCode = 200;
-        response.body = JSON.stringify(body);
-
-        response = {
-            statusCode: 200,
-            body: JSON.stringify(items)
-        };
+        return makeResponse(200,"Task retreived.",[{...Item}]);
     }
     catch(err){
-        const body = {
-            message : "An Error Occured During the Operation.",
-            data : []
-        };
-        response.statusCode = 500;
-        response.body = JSON.stringify(body);
-    }
-    finally{
-        return response;
+        console.log(err);
+        return makeResponse(500,"An Error Occured During the Operation.");
     }
 };
+exports.readTasksHandler = async(event) =>{
+    var params = {
+        TableName : tableName
+    };
+    try{
+        const data = await docClient.scan(params).promise();
+        const items = data.Items;
+        return makeResponse(200,"Tasks retrieved.",items);
+    }
+    catch(err){
+        console.log(err);
+        return makeResponse(500,"An Error Occured During the Operation.");
+    }
+};
+// exports.updateTasksHandler = async(event) =>{
+//     var params = {
+//         TableName : tableName
+//     };
+//     const data = await docClient.scan(params).promise();
+//     const items = data.Items;
+
+//     const response = {
+//         statusCode: 200,
+//         body: JSON.stringify(items)
+//     };
+// };
+// exports.deleteTaskHandler = async(event) =>{
+//     var params = {
+//         TableName : tableName
+//     };
+//     const data = await docClient.scan(params).promise();
+//     const items = data.Items;
+
+//     const response = {
+//         statusCode: 200,
+//         body: JSON.stringify(items)
+//     };
+// };
