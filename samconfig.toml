@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "servelesstodos"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1pi8jlmqck3x8"
+s3_prefix = "servelesstodos"
+region = "us-east-1"
+profile = "default"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

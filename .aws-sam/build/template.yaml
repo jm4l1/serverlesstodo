@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: serverlesstodos
+Transform:
+- AWS::Serverless-2016-10-31
+Resources:
+  TodosTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      TableName: Todos

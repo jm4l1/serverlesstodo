@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  serverlesstodos
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Resources:
+  createTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.createTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function to create a single Todo task.
+      Policies:
+        -  DynamoDBReadPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+
+  readTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.readTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function to retrieve a single Todo task.
+      Policies:
+        -  DynamoDBReadPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: GET
+
+
+  TodosTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      TableName: Todos
