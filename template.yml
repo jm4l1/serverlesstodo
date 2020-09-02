@@ -13,7 +13,7 @@ Resources:
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 100
-      Description: A Lambda function to create a single Todo task.
+      Description: Lambda function to create a single Todo task.
       Policies:
         -  DynamoDBWritePolicy:
             TableName : !Ref TodosTable
@@ -34,7 +34,7 @@ Resources:
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 100
-      Description: A Lambda function to retrieve a single Todo task.
+      Description: Lambda function to retrieve a single Todo task.
       Policies:
         -  DynamoDBReadPolicy:
             TableName : !Ref TodosTable
@@ -55,7 +55,7 @@ Resources:
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 100
-      Description: A Lambda function to retreive a list of Todo tasks.
+      Description: Lambda function to retreive a list of Todo tasks.
       Policies:
         -  DynamoDBReadPolicy:
             TableName : !Ref TodosTable
@@ -69,26 +69,26 @@ Resources:
             Path: /
             Method: GET
 
-  # updateTaskLambdaFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: src/handlers/index/updateTasksHandler
-  #     Runtime: nodejs12.x
-  #     MemorySize: 128
-  #     Timeout: 100
-  #     Description: A Lambda function to update a single Todo task.
-  #     Policies:
-  #       -  DynamoDBReadPolicy:
-  #           TableName : !Ref TodosTable
-  #     Environment:
-  #       Variables:
-  #         TODOS_TABLE: !Ref TodosTable
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /{id}
-  #           Method: PUT
+  updateTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.updateTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Lambda function to update a single Todo task.
+      Policies:
+        -  DynamoDBCrudPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: PUT
 
   # deleteTaskLambdaFunction:
   #   Type: AWS::Serverless::Function
@@ -97,7 +97,7 @@ Resources:
   #     Runtime: nodejs12.x
   #     MemorySize: 128
   #     Timeout: 100
-  #     Description: A Lambda function to delete a single Todo task.
+  #     Description: Lambda function to delete a single Todo task.
   #     Policies:
   #       -  DynamoDBReadPolicy:
   #           TableName : !Ref TodosTable
