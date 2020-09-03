@@ -64,6 +64,9 @@ Resources:
   createTaskLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      DeploymentPreference:
+        Enabled: True
+        Type: ECSCanary10Percent5Minutes 
       Handler: src/handlers/index.createTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -91,6 +94,9 @@ Resources:
   readTaskLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      DeploymentPreference:
+        Enabled: True
+        Type: ECSCanary10Percent5Minutes 
       Handler: src/handlers/index.readTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -118,6 +124,9 @@ Resources:
   readTasksLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      DeploymentPreference:
+        Enabled: True
+        Type: ECSCanary10Percent5Minutes 
       Handler: src/handlers/index.readTasksHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -145,6 +154,9 @@ Resources:
   updateTaskLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      DeploymentPreference:
+        Enabled: True
+        Type: ECSCanary10Percent5Minutes 
       Handler: src/handlers/index.updateTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -172,6 +184,9 @@ Resources:
   deleteTaskLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      DeploymentPreference:
+        Enabled: True
+        Type: ECSCanary10Percent5Minutes 
       Handler: src/handlers/index.deleteTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
