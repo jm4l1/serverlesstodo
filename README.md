@@ -16,4 +16,4 @@ sam deploy
 
 ### Documentation
 
-Docs can be found [here](https://web.postman.co/collections/8382715-63b905f8-0d30-449d-8ae2-01fc9a39cafe?version=latest&workspace=0cb07fce-a316-40e2-8819-c0aef4dbfc46)
+Docs can be found [here](https://documenter.getpostman.com/view/8382715/TVCgxmKE)
