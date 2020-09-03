@@ -3,7 +3,6 @@ Description: Serverless backend for todo task applicaiton.
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
-  #
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -21,148 +20,6 @@ Resources:
                 - Arn
       StageName: prod
       TracingEnabled: true
-
-  createTaskLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/index.createTaskHandler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Tracing: Active
-      Timeout: 100
-      Description: Lambda function to create a single Todo task.
-      Policies:
-        -  DynamoDBWritePolicy:
-            TableName : !Ref TodosTable
-      Environment:
-        Variables:
-          TODOS_TABLE: !Ref TodosTable
-      Events:
-        Api:
-          Auth:
-            Authorizer: CognitoAuth
-          Type: Api
-          Properties:
-            Path: /
-            Method: POST
-            RestApiId:
-              Ref: ApiGatewayApi
-
-  readTaskLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/index.readTaskHandler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Tracing: Active
-      Timeout: 100
-      Description: Lambda function to retrieve a single Todo task.
-      Policies:
-        -  DynamoDBReadPolicy:
-            TableName : !Ref TodosTable
-      Environment:
-        Variables:
-          TODOS_TABLE: !Ref TodosTable
-      Events:
-        Api:
-          Auth:
-            Authorizer: CognitoAuth
-          Type: Api
-          Properties:
-            Path: /{id}
-            Method: GET
-            RestApiId:
-              Ref: ApiGatewayApi
-
-  readTasksLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/index.readTasksHandler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Tracing: Active
-      Timeout: 100
-      Description: Lambda function to retreive a list of Todo tasks.
-      Policies:
-        -  DynamoDBReadPolicy:
-            TableName : !Ref TodosTable
-      Environment:
-        Variables:
-          TODOS_TABLE: !Ref TodosTable
-      Events:
-        Api:
-          Auth:
-            Authorizer: CognitoAuth
-          Type: Api
-          Properties:
-            Path: /
-            Method: GET
-            RestApiId:
-              Ref: ApiGatewayApi
-
-  updateTaskLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/index.updateTaskHandler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Tracing: Active
-      Timeout: 100
-      Description: Lambda function to update a single Todo task.
-      Policies:
-        -  DynamoDBCrudPolicy:
-            TableName : !Ref TodosTable
-      Environment:
-        Variables:
-          TODOS_TABLE: !Ref TodosTable
-      Events:
-        Api:
-          Auth:
-            Authorizer: CognitoAuth
-          Type: Api
-          Properties:
-            Path: /{id}
-            Method: PUT
-            RestApiId:
-              Ref: ApiGatewayApi
-
-  deleteTaskLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/index.deleteTaskHandler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Tracing: Active
-      Timeout: 100
-      Description: Lambda function to delete a single Todo task.
-      Policies:
-        -  DynamoDBCrudPolicy:
-            TableName : !Ref TodosTable
-      Environment:
-        Variables:
-          TODOS_TABLE: !Ref TodosTable
-      Events:
-        Api:
-          Auth:
-            Authorizer: CognitoAuth
-          Type: Api
-          Properties:
-            Path: /{id}
-            Method: DELETE
-            RestApiId:
-              Ref: ApiGatewayApi
-
-
-  TodosTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
-      TableName: Todos
 
   UserPool:
     Type: AWS::Cognito::UserPool
@@ -204,6 +61,152 @@ Resources:
         - COGNITO
       UserPoolId: !Ref UserPool 
 
+  createTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.createTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Tracing: Active
+      Timeout: 100
+      Description: Lambda function to create a single Todo task.
+      Policies:
+        -  DynamoDBWritePolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: CognitoAuth
+            Path: /
+            Method: POST
+            RestApiId: !Ref ApiGatewayApi
+            RequestParameters:
+              - method.request.header.Authorization
+
+  readTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.readTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Tracing: Active
+      Timeout: 100
+      Description: Lambda function to retrieve a single Todo task.
+      Policies:
+        -  DynamoDBReadPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: CognitoAuth
+            Path: /{id}
+            Method: GET
+            RestApiId: !Ref ApiGatewayApi
+            RequestParameters:
+              - method.request.header.Authorization
+
+  readTasksLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.readTasksHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Tracing: Active
+      Timeout: 100
+      Description: Lambda function to retreive a list of Todo tasks.
+      Policies:
+        -  DynamoDBReadPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: CognitoAuth
+            Path: /
+            Method: GET
+            RestApiId: !Ref ApiGatewayApi
+            RequestParameters:
+              - method.request.header.Authorization
+
+  updateTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.updateTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Tracing: Active
+      Timeout: 100
+      Description: Lambda function to update a single Todo task.
+      Policies:
+        -  DynamoDBCrudPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: CognitoAuth
+            Path: /{id}
+            Method: PUT
+            RestApiId: !Ref ApiGatewayApi
+            RequestParameters:
+              - method.request.header.Authorization
+
+  deleteTaskLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.deleteTaskHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Tracing: Active
+      Timeout: 100
+      Description: Lambda function to delete a single Todo task.
+      Policies:
+        -  DynamoDBCrudPolicy:
+            TableName : !Ref TodosTable
+      Environment:
+        Variables:
+          TODOS_TABLE: !Ref TodosTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: CognitoAuth
+            Path: /{id}
+            Method: DELETE
+            RestApiId: !Ref ApiGatewayApi
+            RequestParameters:
+              - method.request.header.Authorization
+
+
+  TodosTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      TableName: Todos
 
 Outputs:
   WebEndpoint:

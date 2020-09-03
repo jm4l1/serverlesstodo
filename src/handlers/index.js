@@ -43,6 +43,7 @@ exports.createTaskHandler = async(event) =>{
     }
 };
 exports.readTaskHandler = async(event) =>{
+    console.log(event)
     const { pathParameters : {id} } =event;
     var readParams = {
         TableName : tableName,
