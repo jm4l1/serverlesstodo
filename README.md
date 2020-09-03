@@ -9,8 +9,10 @@ To build and deploy your application for the first time, run the following in yo
 
 ```bash
 sam build
-sam deploy --guided
+sam deploy
 ```
+
+`build_releash.sh` is a utility script to auto deploy to a given stage based on current git branch.
 
 ### Documentation
 
