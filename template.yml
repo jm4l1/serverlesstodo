@@ -2,6 +2,17 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Serverless backend for todo task applicaiton.
 Transform: AWS::Serverless-2016-10-31
 
+
+Parameters:
+  DeployEnvironment:
+    Type: String
+    Default : Dev
+    AllowedValues : 
+      - Stage
+      - Prod
+      - Dev
+    Description: Environment to deploy 
+
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
@@ -18,7 +29,7 @@ Resources:
               Fn::GetAtt:
                 - UserPool
                 - Arn
-      StageName: prod
+      StageName: !Sub  ${DeployEnvironment}
       TracingEnabled: true
 
   UserPool:
@@ -54,7 +65,7 @@ Resources:
         - email
         - openid
         - profile
-      CallbackURLs: [!Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/" ]
+      CallbackURLs: [!Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${DeployEnvironment}/auth" ]
       ClientName: !Sub serverlesstodos-UserPoolClient 
       GenerateSecret: true 
       SupportedIdentityProviders:
@@ -66,7 +77,8 @@ Resources:
     Properties:
       DeploymentPreference:
         Enabled: True
-        Type: ECSCanary10Percent5Minutes 
+        Type: Canary10Percent5Minutes
+      AutoPublishAlias: createTasklive 
       Handler: src/handlers/index.createTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -96,7 +108,8 @@ Resources:
     Properties:
       DeploymentPreference:
         Enabled: True
-        Type: ECSCanary10Percent5Minutes 
+        Type: Canary10Percent5Minutes
+      AutoPublishAlias: readTasklive 
       Handler: src/handlers/index.readTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -126,7 +139,8 @@ Resources:
     Properties:
       DeploymentPreference:
         Enabled: True
-        Type: ECSCanary10Percent5Minutes 
+        Type: Canary10Percent5Minutes
+      AutoPublishAlias: readTaskslive 
       Handler: src/handlers/index.readTasksHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -156,7 +170,8 @@ Resources:
     Properties:
       DeploymentPreference:
         Enabled: True
-        Type: ECSCanary10Percent5Minutes 
+        Type: Canary10Percent5Minutes
+      AutoPublishAlias: updateTasklive 
       Handler: src/handlers/index.updateTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -186,7 +201,8 @@ Resources:
     Properties:
       DeploymentPreference:
         Enabled: True
-        Type: ECSCanary10Percent5Minutes 
+        Type: Canary10Percent5Minutes
+      AutoPublishAlias: deleteTasklive 
       Handler: src/handlers/index.deleteTaskHandler
       Runtime: nodejs12.x
       MemorySize: 128
@@ -225,8 +241,8 @@ Resources:
 
 Outputs:
   WebEndpoint:
-    Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${DeployEnvironment}/"
 
   UserPoolId:
     Description: "User pool ID"
