@@ -1,11 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  serverlesstodos
-
-Transform:
-- AWS::Serverless-2016-10-31
+Description: Serverless backend for todo task applicaiton.
+Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  #
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Auth:
+        Authorizers:
+          CognitoAuth:
+            AuthorizationScopes:
+              - email
+            Identity:
+              Header: Authorization
+              ReauthorizeEvery: 60
+            UserPoolArn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+      StageName: prod
+      TracingEnabled: true
+
   createTaskLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -23,6 +39,8 @@ Resources:
           TODOS_TABLE: !Ref TodosTable
       Events:
         Api:
+          Auth:
+            Authorizer: CognitoAuth
           Type: Api
           Properties:
             Path: /
@@ -47,6 +65,8 @@ Resources:
           TODOS_TABLE: !Ref TodosTable
       Events:
         Api:
+          Auth:
+            Authorizer: CognitoAuth
           Type: Api
           Properties:
             Path: /{id}
@@ -71,6 +91,8 @@ Resources:
           TODOS_TABLE: !Ref TodosTable
       Events:
         Api:
+          Auth:
+            Authorizer: CognitoAuth
           Type: Api
           Properties:
             Path: /
@@ -95,6 +117,8 @@ Resources:
           TODOS_TABLE: !Ref TodosTable
       Events:
         Api:
+          Auth:
+            Authorizer: CognitoAuth
           Type: Api
           Properties:
             Path: /{id}
@@ -119,6 +143,8 @@ Resources:
           TODOS_TABLE: !Ref TodosTable
       Events:
         Api:
+          Auth:
+            Authorizer: CognitoAuth
           Type: Api
           Properties:
             Path: /{id}
@@ -126,11 +152,6 @@ Resources:
             RestApiId:
               Ref: ApiGatewayApi
 
-  ApiGatewayApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: prod
-      TracingEnabled: true
 
   TodosTable:
     Type: AWS::Serverless::SimpleTable
@@ -143,7 +164,60 @@ Resources:
         WriteCapacityUnits: 2
       TableName: Todos
 
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: serverlesstodos-userpool
+      Policies:
+        PasswordPolicy: 
+          MinimumLength: 8
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes: 
+        - email
+      Schema: 
+        - AttributeDataType: String 
+          Name: email 
+          Required: false
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      Domain: !Sub serverlesstodos-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient 
+    Properties: 
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+        - implicit #for testing with postman
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs: [!Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/" ]
+      ClientName: !Sub serverlesstodos-UserPoolClient 
+      GenerateSecret: true 
+      SupportedIdentityProviders:
+        - COGNITO
+      UserPoolId: !Ref UserPool 
+
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
     Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  UserPoolId:
+    Description: "User pool ID"
+    Value: !Ref UserPool
+  
+  UserPoolClientId:
+    Description: "Application client ID"
+    Value: !Ref UserPoolClient
+  
+  AuthUrl:
+    Description: "URL used for authentication"
+    Value: !Sub https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
