@@ -3,7 +3,6 @@ const tableName = process.env.TODOS_TABLE;
 const  uuid = require('uuid');
 const dynamodb = require('aws-sdk/clients/dynamodb');
 const docClient = new dynamodb.DocumentClient();
-
 const makeResponse = (statusCode, message, data =[] ) =>{
     return({
         statusCode,
